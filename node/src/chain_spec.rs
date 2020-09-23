@@ -4,7 +4,7 @@ use dock_runtime::{
     opaque::SessionKeys,
     AuraConfig, Balance, BalancesConfig, DIDModuleConfig, GenesisConfig, GrandpaConfig,
     MasterConfig, PoAModuleConfig, SessionConfig, SudoConfig, SystemConfig, MILLISECS_PER_BLOCK,
-    WASM_BINARY,
+    WASM_BINARY, CouncilMembershipConfig, TechnicalCommitteeMembershipConfig
 };
 use hex_literal::hex;
 use sc_service::{ChainType, Properties};
@@ -83,6 +83,13 @@ fn get_properties() -> Properties {
     properties
 }
 
+fn get_seed_vector_to_account_vector(seeds: Vec<&str>) -> Vec<AccountId> {
+    seeds.iter()
+        .cloned()
+        .map(get_account_id_from_seed::<sr25519::Public>)
+        .collect()
+}
+
 pub fn development_config() -> ChainSpec {
     ChainSpec::from_genesis(
         "Development",
@@ -91,11 +98,7 @@ pub fn development_config() -> ChainSpec {
         || {
             GenesisBuilder {
                 initial_authorities: vec![get_authority_keys_from_seed("Alice")],
-                endowed_accounts: ["Alice", "Bob", "Alice//stash", "Bob//stash"]
-                    .iter()
-                    .cloned()
-                    .map(get_account_id_from_seed::<sr25519::Public>)
-                    .collect(),
+                endowed_accounts: get_seed_vector_to_account_vector(vec!["Alice", "Bob", "Alice//stash", "Bob//stash"]),
                 master: Membership {
                     members: [
                         b"Alice\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",
@@ -129,6 +132,8 @@ pub fn development_config() -> ChainSpec {
                 min_epoch_length: 8,
                 max_active_validators: 2,
                 emission_status: true,
+                council_members: get_seed_vector_to_account_vector(["Alice//stash", "Bob//stash", "Charlie"].to_vec()),
+                technical_committee_members: get_seed_vector_to_account_vector(["Charlie", "Dave", "Eve"].to_vec()),
             }
             .build()
         },
@@ -151,7 +156,7 @@ pub fn local_testnet_config() -> ChainSpec {
                     get_authority_keys_from_seed("Alice"),
                     get_authority_keys_from_seed("Bob"),
                 ],
-                endowed_accounts: [
+                endowed_accounts: get_seed_vector_to_account_vector(vec![
                     "Alice",
                     "Bob",
                     "Charlie",
@@ -164,11 +169,7 @@ pub fn local_testnet_config() -> ChainSpec {
                     "Dave//stash",
                     "Eve//stash",
                     "Ferdie//stash",
-                ]
-                .iter()
-                .cloned()
-                .map(get_account_id_from_seed::<sr25519::Public>)
-                .collect(),
+                ]),
                 master: Membership {
                     members: [
                         b"Alice\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",
@@ -202,6 +203,8 @@ pub fn local_testnet_config() -> ChainSpec {
                 min_epoch_length: 16,
                 max_active_validators: 5,
                 emission_status: true,
+                council_members: get_seed_vector_to_account_vector(["Alice//stash", "Bob//stash", "Charlie"].to_vec()),
+                technical_committee_members: get_seed_vector_to_account_vector(["Charlie", "Dave", "Eve"].to_vec()),
             }
             .build()
         },
@@ -300,6 +303,9 @@ pub fn testnet_config() -> ChainSpec {
                 min_epoch_length: 1000,
                 max_active_validators: 8,
                 emission_status: false,
+                // XXX: Not applicable for now
+                council_members: vec![],
+                technical_committee_members: vec![],
             }
             .build()
         },
@@ -411,6 +417,9 @@ pub fn mainnet_config() -> ChainSpec {
                 min_epoch_length,
                 max_active_validators,
                 emission_status,
+                // XXX: Not applicable for now
+                council_members: vec![],
+                technical_committee_members: vec![],
             }
             .build()
         },
@@ -434,6 +443,8 @@ struct GenesisBuilder {
     min_epoch_length: u32,
     max_active_validators: u8,
     emission_status: bool,
+    council_members: Vec<AccountId>,
+    technical_committee_members: Vec<AccountId>,
 }
 
 impl GenesisBuilder {
@@ -509,6 +520,16 @@ impl GenesisBuilder {
             }),
             did: Some(DIDModuleConfig { dids: self.dids }),
             sudo: Some(SudoConfig { key: self.sudo }),
+            pallet_collective_Instance1: Some(Default::default()),
+            pallet_membership_Instance1: Some(CouncilMembershipConfig {
+                members: self.council_members,
+                phantom: Default::default(),
+            }),
+            pallet_collective_Instance2: Some(Default::default()),
+            pallet_membership_Instance2: Some(TechnicalCommitteeMembershipConfig {
+                members: self.technical_committee_members,
+                phantom: Default::default(),
+            }),
         }
     }
 
