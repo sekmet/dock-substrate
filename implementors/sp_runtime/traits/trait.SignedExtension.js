@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["token_migration"] = [{"text":"impl&lt;T:&nbsp;Trait + Send + Sync&gt; SignedExtension for OnlyMigrator&lt;T&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;T as Trait&gt;::Call: IsSubType&lt;Call&lt;T&gt;&gt;,&nbsp;</span>","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
