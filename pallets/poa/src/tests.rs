@@ -926,6 +926,7 @@ fn validator_block_counts() {
         for id in &[val_id1, val_id2] {
             PoAModule::add_validator_(*id, false).unwrap();
         }
+
         PoAModule::update_active_validators_if_needed();
         PoAModule::update_details_on_new_epoch(1, 2, 2);
 
@@ -1158,7 +1159,7 @@ fn validator_rewards_for_non_empty_epoch() {
         let expected_slots_per_validator = 10;
         let slots_per_validator = 10;
         let total_validator_reward =
-            PoAModule::mint_and_track_validator_rewards_for_non_empty_epoch(
+            PoAModule::mint_and_track_validator_rewards_for_rewarding_epoch(
                 current_epoch_no,
                 expected_slots_per_validator,
                 slots_per_validator,
@@ -1185,7 +1186,7 @@ fn validator_rewards_for_non_empty_epoch() {
         let expected_slots_per_validator = 20;
         let slots_per_validator = 10;
         let total_validator_reward =
-            PoAModule::mint_and_track_validator_rewards_for_non_empty_epoch(
+            PoAModule::mint_and_track_validator_rewards_for_rewarding_epoch(
                 current_epoch_no,
                 expected_slots_per_validator,
                 slots_per_validator,
@@ -1227,7 +1228,7 @@ fn validator_rewards_for_non_empty_epoch() {
         let expected_slots_per_validator = 10;
         let slots_per_validator = 10;
         let total_validator_reward =
-            PoAModule::mint_and_track_validator_rewards_for_non_empty_epoch(
+            PoAModule::mint_and_track_validator_rewards_for_rewarding_epoch(
                 current_epoch_no,
                 expected_slots_per_validator,
                 slots_per_validator,
@@ -1268,7 +1269,7 @@ fn validator_rewards_for_non_empty_epoch() {
         let expected_slots_per_validator = 12;
         let slots_per_validator = 12;
         let total_validator_reward =
-            PoAModule::mint_and_track_validator_rewards_for_non_empty_epoch(
+            PoAModule::mint_and_track_validator_rewards_for_rewarding_epoch(
                 current_epoch_no,
                 expected_slots_per_validator,
                 slots_per_validator,
@@ -1309,7 +1310,7 @@ fn validator_rewards_for_non_empty_epoch() {
         let expected_slots_per_validator = 16;
         let slots_per_validator = 16;
         let total_validator_reward =
-            PoAModule::mint_and_track_validator_rewards_for_non_empty_epoch(
+            PoAModule::mint_and_track_validator_rewards_for_rewarding_epoch(
                 current_epoch_no,
                 expected_slots_per_validator,
                 slots_per_validator,
@@ -1356,7 +1357,7 @@ fn validator_rewards_for_non_empty_epoch() {
         let expected_slots_per_validator = 15;
         let slots_per_validator = 15;
         let total_validator_reward =
-            PoAModule::mint_and_track_validator_rewards_for_non_empty_epoch(
+            PoAModule::mint_and_track_validator_rewards_for_rewarding_epoch(
                 current_epoch_no,
                 expected_slots_per_validator,
                 slots_per_validator,
@@ -1397,7 +1398,7 @@ fn validator_rewards_for_non_empty_epoch() {
         let expected_slots_per_validator = 18;
         let slots_per_validator = 18;
         let total_validator_reward =
-            PoAModule::mint_and_track_validator_rewards_for_non_empty_epoch(
+            PoAModule::mint_and_track_validator_rewards_for_rewarding_epoch(
                 current_epoch_no,
                 expected_slots_per_validator,
                 slots_per_validator,
@@ -1463,7 +1464,7 @@ fn rewards_for_non_empty_epoch() {
         // No slots are used by any validators and they both get no reward and emission supply does not change
         let slots_per_validator = 10;
         let mut epoch_detail = EpochDetail::new(2, 1, 26);
-        PoAModule::mint_rewards_for_non_empty_epoch(
+        PoAModule::mint_and_track_rewards_for_rewarding_epoch(
             &mut epoch_detail,
             current_epoch_no,
             slots_per_validator,
@@ -1485,7 +1486,7 @@ fn rewards_for_non_empty_epoch() {
         let slots_per_validator = 10;
         // Expecting 13 slots per validator
         let mut epoch_detail = EpochDetail::new(2, 1, 26);
-        PoAModule::mint_rewards_for_non_empty_epoch(
+        PoAModule::mint_and_track_rewards_for_rewarding_epoch(
             &mut epoch_detail,
             current_epoch_no,
             slots_per_validator,
@@ -1580,9 +1581,9 @@ fn emission_rewards_status() {
         ));
 
         // No emission rewards were generated
-        assert!(epoch_detail.total_emission.is_none());
-        assert!(epoch_detail.emission_for_treasury.is_none());
-        assert!(epoch_detail.emission_for_validators.is_none());
+        assert_eq!(epoch_detail.total_emission.unwrap(), 0);
+        assert_eq!(epoch_detail.emission_for_treasury.unwrap(), 0);
+        assert_eq!(epoch_detail.emission_for_validators.unwrap(), 0);
     });
 }
 

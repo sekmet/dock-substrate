@@ -89,6 +89,7 @@ fn get_dev_properties() -> Properties {
     properties
 }
 
+#[allow(dead_code)]
 fn get_testnet_properties() -> Properties {
     let mut properties = get_common_properties_map();
     properties.insert("ss58Format".into(), 21.into());
@@ -109,11 +110,20 @@ pub fn development_config() -> ChainSpec {
         || {
             GenesisBuilder {
                 initial_authorities: vec![get_authority_keys_from_seed("Alice")],
-                endowed_accounts: ["Alice", "Bob", "Alice//stash", "Bob//stash", "Charlie", "Dave", "Eve", "Ferdie",]
-                    .iter()
-                    .cloned()
-                    .map(get_account_id_from_seed::<sr25519::Public>)
-                    .collect(),
+                endowed_accounts: [
+                    "Alice",
+                    "Bob",
+                    "Alice//stash",
+                    "Bob//stash",
+                    "Charlie",
+                    "Dave",
+                    "Eve",
+                    "Ferdie",
+                ]
+                .iter()
+                .cloned()
+                .map(get_account_id_from_seed::<sr25519::Public>)
+                .collect(),
                 master: Membership {
                     members: [
                         b"Alice\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",
@@ -347,19 +357,15 @@ pub fn mainnet_config() -> ChainSpec {
         ChainType::Live,
         move || {
             GenesisBuilder {
-                initial_authorities: vec![
-                    (
-                        account_id_from_ss58::<sr25519::Public>(
-                            "3Gb64wBURVBpAau5WVRRpAgNLPAnqsPR3CgoZPAK6diinaMp",
-                        ),
-                        pubkey_from_ss58::<AuraId>(
-                            "3Gr7uEiA7jis4DdijeSTQnXoU4tc8DUZkjpy3mshhgyx3Hyw",
-                        ),
-                        pubkey_from_ss58::<GrandpaId>(
-                            "3G4PHvp6EDBbmvfcDLEEkAQk1cRmvh3ZHp264pERRzcZzHwn",
-                        ),
-                    )
-                ],
+                initial_authorities: vec![(
+                    account_id_from_ss58::<sr25519::Public>(
+                        "3Gb64wBURVBpAau5WVRRpAgNLPAnqsPR3CgoZPAK6diinaMp",
+                    ),
+                    pubkey_from_ss58::<AuraId>("3Gr7uEiA7jis4DdijeSTQnXoU4tc8DUZkjpy3mshhgyx3Hyw"),
+                    pubkey_from_ss58::<GrandpaId>(
+                        "3G4PHvp6EDBbmvfcDLEEkAQk1cRmvh3ZHp264pERRzcZzHwn",
+                    ),
+                )],
                 endowed_accounts: [
                     "3EjNXTpMJieqEF5Fj5szwAqpvmmKFG3YtsY5eBazxaCkNtoz",
                     "3HmNvFfZey63mdUdKrQ2iTdbYB6ic5y9QaAZCQZ7aWMBnUu8",
@@ -446,14 +452,14 @@ impl GenesisBuilder {
         // 1 token is 25000000 gas
         let token_to_gas: Balance = 25_000_000;
         // 200M tokens
-        let emission_supply: Balance = token_to_gas * 200_000_000;
+        let emission_supply: Balance = token_to_gas.checked_mul(200_000_000).unwrap();
         // TODO: This needs to be tweaked once we know all exchanges
         // 100M tokens
-        let per_member_endowment: Balance = token_to_gas * 100_000_000;
+        let per_member_endowment: Balance = token_to_gas.checked_mul(100_000_000).unwrap();
 
         // Max emission per validator in an epoch
         // 30K tokens
-        let max_emm_validator_epoch: Balance = token_to_gas * 15_000;
+        let max_emm_validator_epoch: Balance = token_to_gas.checked_mul(15_000).unwrap();
 
         // Percentage of rewards given to Treasury
         let treasury_reward_pc = 60;
